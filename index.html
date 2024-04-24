@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>sdk</title>
+    <script src="./static/js/vue.js"></script>
+    <!-- 2022-12-05新增start -->
+    <link rel="stylesheet" href="https://viu-sdk-cdn.yuntiancloud.com/h5/ui/vrviu-ui.stable.css">
+    <script src="https://viu-sdk-cdn.yuntiancloud.com/h5/ui/vrviu-ui.stable.js"></script>
+    <!-- 2022-12-05新增end -->
+</head>
+<body>
+<div id="app">
+    <component v-bind:is="comp" ref='sdkCom'></component>
+    <div class="warpBox" style="position: fixed;top: 10px;left: 0;color: red;z-index: 1;">
+        <div class='closeGame' @click='fisinhGame()'>关闭游戏</div>
+        <div @click='wrapFn()'>手柄</div>
+        <div class='warpBox' @click='sendMsg("发送消息")'>发送消息</div>
+        <div class='warpBox' @click="changeResolution()">切换分辨率</div>
+        <div class='warpBox' @click="setLsVideoSetting()">主机游戏修改视频编码</div>
+    </div>
+</div>
+</body>
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            let that = this
+            return {
+                parms: {
+                    tenantSecret: '441c84084acb5cf2',
+                    tenantBid: 'ecloud7wb6ZH2U0H27911',
+                    tenantGameId: 100975,
+                    userID: 'user00001',
+                    sdk_src: './static/js/sdk/prod', // ...../test 或者是 ....../prod 区分是测试环境还是生产环境 海马威尔 sdk 加载的相对路径
+                    gamePackage: 'com.citylife.zysy',
+                    protoData: {},
+                    portalType: 'PC', //判断是PC端还是 H5 端
+                    handleGameStatusCode: that.handleGameStatusCode,
+                    resolutionList: that.resolutionList
+                },
+                comp: ''
+            }
+
+        },
+        created() {
+            const script = document.createElement('script')
+            script.src = './static/js/sdk1.js'
+            document.head.appendChild(script)
+            script.onload = () => {
+                const exportCom = window.SDK.default
+                this.comp = exportCom
+            }
+        },
+        mounted() {
+            let that = this
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    that.startGame(this.parms);
+                }, 500)
+            })
+        },
+        methods: {
+            startGame(data) {
+                this.$nextTick(() => {
+                    this.$refs.sdkCom.startGame(data) //加载sdk包
+                })
+            },
+
+            fisinhGame() {
+                const that = this;
+                this.$nextTick(() => {
+                    that.$refs.sdkCom.finishGame()
+                })
+            },
+            sendMsg() {
+                const that = this;
+                this.$nextTick(() => {
+                    that.$refs.sdkCom.sendMsg('消息发送1111')
+                })
+            },
+            wrapFn() {
+                let data = {
+                    isShowKeyboard: false,
+                    isShowGamepad: true,
+                }
+                const that = this;
+                this.$nextTick(() => {
+                    that.$refs.sdkCom.wrapFn(data)
+                })
+            },
+            handleGameStatusCode(code, msg) {
+                // sdk 的提示信息及报错信息
+                if (code == 30002) {
+                    this.sendMsg()
+                }
+                console.log(code, msg, '-------handleGameStatusCode------')
+            },
+            resolutionList(data) {
+                console.log(data, '-------resolutionList------')
+            },
+            changeResolution() {
+                this.$nextTick(() => {
+                    this.$refs.sdkCom.changeResolution(2)
+                })
+            },
+        },
+    })
+</script>
+</html>
